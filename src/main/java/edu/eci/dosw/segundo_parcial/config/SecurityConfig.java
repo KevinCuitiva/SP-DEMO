@@ -41,13 +41,22 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**")
                         .permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/users/*/payments/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/users/*/payments/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/users/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/users/**").authenticated()
-                        .anyRequest().authenticated())
+                    // Categorías: GET permitido a todos, POST/PUT/DELETE solo ADMIN
+                    .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/categories/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/api/categories/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("ADMIN")
+                    // Productos: GET permitido a todos, POST/PUT/DELETE requiere autenticación
+                    .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/products/**").authenticated()
+                    .requestMatchers(HttpMethod.PUT, "/api/products/**").authenticated()
+                    .requestMatchers(HttpMethod.DELETE, "/api/products/**").authenticated()
+                    // Usuarios: GET requiere autenticación, POST/PUT/DELETE solo ADMIN
+                    .requestMatchers(HttpMethod.POST, "/api/users/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/api/users/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/users/**").authenticated()
+                    .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

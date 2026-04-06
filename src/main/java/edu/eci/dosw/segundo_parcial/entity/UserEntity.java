@@ -1,8 +1,5 @@
 package edu.eci.dosw.segundo_parcial.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,7 +7,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -44,9 +40,6 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role = Role.USER;
-
-    @OneToMany(mappedBy = "user")
-    private List<PaymentEntity> payments = new ArrayList<>();
 
     public UserEntity() {
     }
@@ -119,13 +112,5 @@ public class UserEntity {
 
     public void setRole(Role role) {
         this.role = role == null ? Role.USER : role;
-    }
-
-    public List<PaymentEntity> getPayments() {
-        return payments;
-    }
-
-    public void setPayments(List<PaymentEntity> payments) {
-        this.payments = payments;
     }
 }

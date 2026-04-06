@@ -1,82 +1,128 @@
 # segundo-parcial
 
-Base de API Spring Boot con:
+API REST Spring Boot 4.0.3 (Java 21) con arquitectura escalable y extensible.
 
-- CRUD simple de usuarios
-- Autenticacion JWT
-- Persistencia con Spring Data JPA
-- Seguridad con Spring Security
+## ✨ Características Principales
+
+### Autenticación & Seguridad
+- ✅ Autenticación JWT con tokens de 24 horas
+- ✅ Control de acceso por rol (ADMIN, USER)
+- ✅ Spring Security configurado
+
+### Gestión de Usuarios
+- ✅ CRUD de usuarios
+- ✅ Perfil de usuario con número de teléfono
+- ✅ Encriptación de contraseñas con BCrypt
+
+### Catálogo de Productos (NEW ✨)
+- ✅ CRUD de productos con relaciones
+- ✅ Categorías de productos
+- ✅ Búsqueda avanzada (por nombre, categoría, creador)
+- ✅ Gestión de inventario (stock)
+- ✅ Información del creador/vendedor
+
+### Arquitectura
+- ✅ Patrón de capas: Entity → Repository → Service → Controller → DTO
+- ✅ Clases base reutilizables (BaseEntity, BaseRepository)
+- ✅ Auditoría automática de fechas (createdAt, updatedAt)
+- ✅ Persistencia con Spring Data JPA & H2 en memoria
+- ✅ Documentación OpenAPI (Swagger disponible en `/swagger-ui/`)
 
 ## Ejecutar
 
 ```bash
-mvn clean test
+# Compilar
+mvn clean compile
+
+# Ejecutar tests
+mvn test
+
+# Ejecutar la aplicación
 mvn spring-boot:run
 ```
 
-## Datos iniciales
+La aplicación estará disponible en `http://localhost:8081`
 
-La aplicacion crea dos usuarios al arrancar:
+## Liberar puerto 8081 (PowerShell)
 
-- `admin@segundoparcial.com` / `admin123`
-- `user@segundoparcial.com` / `user123`
+Si `mvn spring-boot:run` falla porque el puerto ya está en uso, usa estos comandos:
 
-## Endpoints base
+```powershell
+# 1) Ver qué proceso está escuchando en 8081
+netstat -ano | Select-String ":8081"
 
-- `POST /api/auth/login`
-- `POST /api/auth/register`
-- `GET /api/users`
-- `GET /api/users/{id}`
-- `POST /api/users`
-- `PUT /api/users/{id}/profile`
-- `DELETE /api/users/{id}`
-- `GET /api/users/{userId}/payments`
-- `GET /api/users/{userId}/payments/{paymentId}`
-- `POST /api/users/{userId}/payments`
+# 2) Matar el proceso por PID (reemplaza 12345 por el PID real)
+Stop-Process -Id 12345 -Force
 
-## Body para Postman
-
-En Postman usa:
-
-- `Body -> raw -> JSON`
-- Header `Content-Type: application/json`
-
-### Login (`POST /api/auth/login`)
-
-```json
-{
-	"email": "admin@segundoparcial.com",
-	"password": "admin123"
-}
+# 3) Arrancar de nuevo el proyecto
+./mvnw spring-boot:run
 ```
 
-### Registro (`POST /api/auth/register`)
+También puedes hacerlo en una sola línea:
 
-```json
-{
-	"name": "Estudiante Demo",
-	"email": "estudiante@ejemplo.com",
-	"password": "clave123",
-	"phoneNumber": "+573001112233",
-	"role": "USER"
-}
+```powershell
+Get-NetTCPConnection -LocalPort 8081 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }; ./mvnw spring-boot:run
 ```
 
-### Crear usuario (`POST /api/users`)
+---
 
-```json
-{
-	"name": "Nuevo Admin",
-	"email": "nuevoadmin@ejemplo.com",
-	"password": "admin123",
-	"phoneNumber": "+573224445566",
-	"role": "ADMIN"
-}
-```
+## 📚 Documentación
 
-### Actualizar perfil (`PUT /api/users/{id}/profile`)
+Consulta estos archivos para entender la API:
 
-```json
+| Archivo | Propósito |
+|---------|-----------|
+| [ENDPOINTS.md](ENDPOINTS.md) | Lista completa de todos los endpoints |
+| [ARQUITECTURA.md](ARQUITECTURA.md) | Guía de arquitectura y cómo extender |
+| [EJEMPLOS_API.md](EJEMPLOS_API.md) | Ejemplos prácticos con cURL |
+| [RESUMEN_CAMBIOS.md](RESUMEN_CAMBIOS.md) | Resumen de nuevas funcionalidades |
+
+---
+
+## 🔑 Datos Iniciales
+
+Al arrancar la aplicación, se crean dos usuarios automáticamente:
+
+| Email | Contraseña | Rol |
+|-------|-----------|-----|
+| `admin@segundoparcial.com` | `admin123` | ADMIN |
+| `user@segundoparcial.com` | `user123` | USER |
+
+---
+
+## 🛣️ Endpoints Principales
+
+### 🔐 Autenticación
+- `POST /api/auth/login` - Obtener token JWT (público)
+- `POST /api/auth/register` - Registrar nuevo usuario (público)
+
+### 👥 Usuarios
+- `GET /api/users` - Listar usuarios (requiere auth)
+- `GET /api/users/{id}` - Obtener usuario (requiere auth)
+- `POST /api/users` - Crear usuario (solo ADMIN)
+- `PUT /api/users/{id}/profile` - Actualizar perfil (requiere auth)
+- `DELETE /api/users/{id}` - Eliminar usuario (solo ADMIN)
+
+### 📦 Categorías (NEW ✨)
+- `GET /api/categories` - Obtener categorías (público)
+- `GET /api/categories/{id}` - Obtener categoría (público)
+- `POST /api/categories` - Crear categoría (solo ADMIN)
+- `PUT /api/categories/{id}` - Actualizar categoría (solo ADMIN)
+- `DELETE /api/categories/{id}` - Eliminar categoría (solo ADMIN)
+
+### 🛍️ Productos (NEW ✨)
+- `GET /api/products` - Obtener productos (público)
+- `GET /api/products/{id}` - Obtener producto (público)
+- `GET /api/products/search?name=...` - Buscar por nombre (público)
+- `GET /api/products/category/{categoryId}` - Por categoría (público)
+- `GET /api/products/creator/{creatorId}` - Por vendedor (público)
+- `POST /api/products` - Crear producto (requiere auth)
+- `PUT /api/products/{id}` - Actualizar producto (requiere auth)
+- `DELETE /api/products/{id}` - Eliminar producto (requiere auth)
+
+---
+
+## 💡 Ejemplos de Uso
 {
 	"name": "Nombre Actualizado",
 	"phoneNumber": "+573000009999"
