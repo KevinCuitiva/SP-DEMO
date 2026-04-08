@@ -1,157 +1,259 @@
-# segundo-parcial
+# DOSW-ParcialT2
 
-API REST Spring Boot 4.0.3 (Java 21) con arquitectura escalable y extensible.
+API REST en Spring Boot con JWT, JPA y PostgreSQL. El proyecto está organizado por capas para que cada cambio tenga un lugar claro: entidad, repositorio, servicio, controlador, DTO y seguridad.
 
-## ✨ Características Principales
+## Resumen
 
-### Autenticación & Seguridad
-- ✅ Autenticación JWT con tokens de 24 horas
-- ✅ Control de acceso por rol (ADMIN, USER)
-- ✅ Spring Security configurado
+- Autenticación JWT con roles `ADMIN` y `USER`.
+- Gestión de usuarios con actualización de perfil.
+- Catálogo de categorías y productos.
+- Clases base reutilizables para reducir repetición.
+- Swagger disponible en `/swagger-ui/`.
+- Configuración separada por perfiles para desarrollo y producción.
 
-### Gestión de Usuarios
-- ✅ CRUD de usuarios
-- ✅ Perfil de usuario con número de teléfono
-- ✅ Encriptación de contraseñas con BCrypt
+## Requisitos
 
-### Catálogo de Productos (NEW ✨)
-- ✅ CRUD de productos con relaciones
-- ✅ Categorías de productos
-- ✅ Búsqueda avanzada (por nombre, categoría, creador)
-- ✅ Gestión de inventario (stock)
-- ✅ Información del creador/vendedor
+- Java 21.
+- Maven.
+- PostgreSQL 16 o compatible.
+- Opcional: Docker para levantar la base de datos rápidamente.
 
-### Arquitectura
-- ✅ Patrón de capas: Entity → Repository → Service → Controller → DTO
-- ✅ Clases base reutilizables (BaseEntity, BaseRepository)
-- ✅ Auditoría automática de fechas (createdAt, updatedAt)
-- ✅ Persistencia con Spring Data JPA & H2 en memoria
-- ✅ Documentación OpenAPI (Swagger disponible en `/swagger-ui/`)
+## Ejecutarlo en Otro PC
 
-## Ejecutar
+1. Instala Git, Java 21, Docker Desktop y Maven (si no usarás el wrapper).
+2. Clona el repositorio.
+3. Abre Docker Desktop y espera a que quede iniciado.
+4. Desde la raíz del proyecto, levanta la base de datos con Docker Compose.
+5. Arranca la API de forma normal.
+
+Comandos:
 
 ```bash
-# Compilar
-mvn clean compile
+git clone <URL_DEL_REPOSITORIO>
+cd SP-DEMO
+docker compose up -d
+./mvnw spring-boot:run
 
-# Ejecutar tests
-mvn test
-
-# Ejecutar la aplicación
-mvn spring-boot:run
 ```
 
-La aplicación estará disponible en `http://localhost:8081`
-
-## Liberar puerto 8081 (PowerShell)
-
-Si `mvn spring-boot:run` falla porque el puerto ya está en uso, usa estos comandos:
+Si estás en PowerShell, usa:
 
 ```powershell
-# 1) Ver qué proceso está escuchando en 8081
-netstat -ano | Select-String ":8081"
+.\mvnw spring-boot:run
+```
 
-# 2) Matar el proceso por PID (reemplaza 12345 por el PID real)
-Stop-Process -Id 12345 -Force
+## Configuración de Base de Datos
 
-# 3) Arrancar de nuevo el proyecto
+Este ejercicio usa configuración fija local:
+
+- Host: `localhost`
+- Puerto: `5432`
+- Base de datos: `segundo_parcial`
+- Usuario: `segundo_parcial`
+- Contraseña: `segundo_parcial`
+
+Si necesitas cambiar la conexión, edita [src/main/resources/application.properties](src/main/resources/application.properties).
+
+Por defecto la app levanta con `ddl-auto=update` en `application.properties` para crear/actualizar tablas automáticamente en local. En producción, el perfil `application-prod.properties` usa `ddl-auto=validate`.
+
+Importante: si usas Docker, abre Docker Desktop antes de levantar la base.
+
+## Ejecutar la Base de Datos (Docker)
+
+Desde la raíz del proyecto:
+
+```bash
+docker compose up -d
+docker compose ps
+```
+
+Si quieres detenerla:
+
+```bash
+docker compose down
+```
+
+## Ejecutar la API
+
+Con la base ya arriba:
+
+```bash
+mvn clean test
 ./mvnw spring-boot:run
 ```
 
-También puedes hacerlo en una sola línea:
+La aplicación queda en `http://localhost:8081`.
 
-```powershell
-Get-NetTCPConnection -LocalPort 8081 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }; ./mvnw spring-boot:run
+Swagger:
+
+```text
+http://localhost:8081/swagger-ui/
 ```
 
----
+## Ver la Base de Datos
 
-## 📚 Documentación
+Opción 1 (rápida por terminal, dentro del contenedor):
 
-Consulta estos archivos para entender la API:
+```bash
+docker exec -it sp-demo-postgres psql -U segundo_parcial -d segundo_parcial
+```
 
-| Archivo | Propósito |
-|---------|-----------|
-| [ENDPOINTS.md](ENDPOINTS.md) | Lista completa de todos los endpoints |
-| [ARQUITECTURA.md](ARQUITECTURA.md) | Guía de arquitectura y cómo extender |
-| [EJEMPLOS_API.md](EJEMPLOS_API.md) | Ejemplos prácticos con cURL |
-| [RESUMEN_CAMBIOS.md](RESUMEN_CAMBIOS.md) | Resumen de nuevas funcionalidades |
+Comandos útiles dentro de `psql`:
 
----
+```sql
+\dt
+SELECT * FROM users;
+SELECT * FROM categories;
+SELECT * FROM products;
+```
 
-## 🔑 Datos Iniciales
+Salir de `psql`:
 
-Al arrancar la aplicación, se crean dos usuarios automáticamente:
+```bash
+\q
+```
+
+Opción 2 (interfaz visual): usar DBeaver o pgAdmin con estos datos:
+
+- Host: `localhost`
+- Puerto: `5432`
+- Base de datos: `segundo_parcial`
+- Usuario: `segundo_parcial`
+- Contraseña: `segundo_parcial`
+
+## Usuarios Iniciales
+
+Al iniciar por primera vez se crean dos usuarios:
 
 | Email | Contraseña | Rol |
-|-------|-----------|-----|
-| `admin@segundoparcial.com` | `admin123` | ADMIN |
-| `user@segundoparcial.com` | `user123` | USER |
+|-------|------------|-----|
+| `admin@segundoparcial.com` | `admin123` | `ADMIN` |
+| `user@segundoparcial.com` | `user123` | `USER` |
 
----
+## Estructura General
 
-## 🛣️ Endpoints Principales
+El código se divide así:
 
-### 🔐 Autenticación
-- `POST /api/auth/login` - Obtener token JWT (público)
-- `POST /api/auth/register` - Registrar nuevo usuario (público)
+- `entity/`: entidades JPA y clases base.
+- `repository/`: acceso a datos.
+- `service/`: lógica de negocio.
+- `controller/`: endpoints REST.
+- `dto/`: request/response de la API.
+- `config/`: seguridad y arranque de datos.
+- `security/`: filtro JWT y soporte de autenticación.
+- `exception/`: manejo centralizado de errores.
 
-### 👥 Usuarios
-- `GET /api/users` - Listar usuarios (requiere auth)
-- `GET /api/users/{id}` - Obtener usuario (requiere auth)
-- `POST /api/users` - Crear usuario (solo ADMIN)
-- `PUT /api/users/{id}/profile` - Actualizar perfil (requiere auth)
-- `DELETE /api/users/{id}` - Eliminar usuario (solo ADMIN)
+La clase principal está en [src/main/java/edu/eci/dosw/segundo_parcial/SegundoParcialApplication.java](src/main/java/edu/eci/dosw/segundo_parcial/SegundoParcialApplication.java).
 
-### 📦 Categorías (NEW ✨)
-- `GET /api/categories` - Obtener categorías (público)
-- `GET /api/categories/{id}` - Obtener categoría (público)
-- `POST /api/categories` - Crear categoría (solo ADMIN)
-- `PUT /api/categories/{id}` - Actualizar categoría (solo ADMIN)
-- `DELETE /api/categories/{id}` - Eliminar categoría (solo ADMIN)
+## Extensibilidad
 
-### 🛍️ Productos (NEW ✨)
-- `GET /api/products` - Obtener productos (público)
-- `GET /api/products/{id}` - Obtener producto (público)
-- `GET /api/products/search?name=...` - Buscar por nombre (público)
-- `GET /api/products/category/{categoryId}` - Por categoría (público)
-- `GET /api/products/creator/{creatorId}` - Por vendedor (público)
-- `POST /api/products` - Crear producto (requiere auth)
-- `PUT /api/products/{id}` - Actualizar producto (requiere auth)
-- `DELETE /api/products/{id}` - Eliminar producto (requiere auth)
+Si vas a agregar una característica nueva:
 
----
+1. Crea o ajusta la entidad en `entity/`.
+2. Expón datos con DTOs en `dto/`.
+3. Agrega o modifica el repositorio en `repository/`.
+4. Implementa la lógica en `service/`.
+5. Publica el endpoint en `controller/`.
+6. Revisa permisos en `config/SecurityConfig.java`.
 
-## 💡 Ejemplos de Uso
-{
-	"name": "Nombre Actualizado",
-	"phoneNumber": "+573000009999"
-}
+Reglas prácticas:
+
+- Usa `BaseEntity` para heredar `id`, `createdAt` y `updatedAt`.
+- Usa `BaseRepository` para reaprovechar CRUD.
+- No expongas entidades directamente en respuestas; usa DTOs.
+- Valida datos de entrada en los DTOs con anotaciones Jakarta Validation.
+
+## Endpoints Principales
+
+### Autenticación
+
+- `POST /api/auth/login` - Obtener token JWT.
+- `POST /api/auth/register` - Registrar usuario.
+
+### Usuarios
+
+- `GET /api/users` - Listar usuarios.
+- `GET /api/users/{id}` - Obtener usuario por ID.
+- `POST /api/users` - Crear usuario.
+- `PUT /api/users/{id}/profile` - Actualizar perfil.
+- `DELETE /api/users/{id}` - Eliminar usuario.
+
+### Categorías
+
+- `GET /api/categories` - Listar categorías activas.
+- `GET /api/categories/{id}` - Obtener categoría por ID.
+- `POST /api/categories` - Crear categoría.
+- `PUT /api/categories/{id}` - Actualizar categoría.
+- `DELETE /api/categories/{id}` - Eliminar categoría.
+
+### Productos
+
+- `GET /api/products` - Listar productos disponibles.
+- `GET /api/products/{id}` - Obtener producto por ID.
+- `GET /api/products/search?name=...` - Buscar por nombre.
+- `GET /api/products/category/{categoryId}` - Obtener por categoría.
+- `GET /api/products/creator/{creatorId}` - Obtener por creador.
+- `POST /api/products` - Crear producto.
+- `PUT /api/products/{id}` - Actualizar producto.
+- `DELETE /api/products/{id}` - Eliminar producto.
+
+## Seguridad
+
+Endpoints públicos:
+
+- `POST /api/auth/login`
+- `POST /api/auth/register`
+- `GET /api/categories/**`
+- `GET /api/products/**`
+
+Endpoints protegidos:
+
+- `GET /api/users/**` requiere autenticación.
+- `POST /api/users/**`, `PUT /api/users/**` y `DELETE /api/users/**` requieren rol `ADMIN`.
+- `POST /api/categories/**`, `PUT /api/categories/**` y `DELETE /api/categories/**` requieren rol `ADMIN`.
+- `POST /api/products/**`, `PUT /api/products/**` y `DELETE /api/products/**` requieren autenticación.
+
+## Ejemplos de Uso
+
+### Login
+
+```bash
+curl -X POST http://localhost:8081/api/auth/login \
+	-H "Content-Type: application/json" \
+	-d '{"email":"admin@segundoparcial.com","password":"admin123"}'
 ```
 
-### Crear pago de usuario (`POST /api/users/{userId}/payments`)
+### Crear categoría
 
-```json
-{
-	"amount": 125000.00,
-	"concept": "Matricula 2026-1"
-}
+```bash
+curl -X POST http://localhost:8081/api/categories \
+	-H "Authorization: Bearer <token>" \
+	-H "Content-Type: application/json" \
+	-d '{"name":"Electrónica","description":"Productos electrónicos"}'
 ```
 
-## JWT
+### Crear producto
 
-El login retorna un token `Bearer` que debes enviar en el header:
-
-```http
-Authorization: Bearer <token>
+```bash
+curl -X POST http://localhost:8081/api/products \
+	-H "Authorization: Bearer <token>" \
+	-H "Content-Type: application/json" \
+	-d '{"name":"Laptop","description":"Laptop de prueba","price":1299.99,"stock":10,"categoryId":1}'
 ```
 
-La clave y la expiracion estan en `src/main/resources/application.properties`.
+## Checklist de Cambio
 
-## Como modificarla
+- [ ] Crear o ajustar la entidad.
+- [ ] Crear o ajustar el DTO.
+- [ ] Crear o ajustar el repositorio.
+- [ ] Crear o ajustar el servicio.
+- [ ] Exponer o actualizar el controlador.
+- [ ] Revisar seguridad en `SecurityConfig`.
+- [ ] Validar con `mvn test`.
 
-- Si quieres mas campos de usuario, empieza por `UserEntity`, `UserRequest` y `UserResponse`.
-- Si quieres mas reglas de negocio, cambia `UserService` o `AuthService`.
-- Si quieres mas endpoints, agrega otro controlador siguiendo el mismo patron de `controller -> service -> repository`.
-- Si quieres cambiar seguridad, revisa `SecurityConfig` y `JwtAuthenticationFilter`.
-- Si quieres otra base de datos, cambia `application.properties` y la dependencia del driver JDBC.
+## Notas de Mantenimiento
+
+- Si cambias la estructura de datos, empieza por `entity/` y luego sincroniza `dto/` y `service/`.
+- Si cambias reglas de acceso, ajusta `config/SecurityConfig.java`.
+- Si cambias la conexión o credenciales, edita `application.properties`.
+- Si cambias el comportamiento por entorno, usa los perfiles `application-dev.properties` y `application-prod.properties`.

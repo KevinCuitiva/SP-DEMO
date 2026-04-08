@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: sp-demo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: segundo_parcial
+      POSTGRES_USER: segundo_parcial
+      POSTGRES_PASSWORD: segundo_parcial
+    ports:
+      - "5432:5432"
+    volumes:
+      - sp_demo_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  sp_demo_postgres_data:
