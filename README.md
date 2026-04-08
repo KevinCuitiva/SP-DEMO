@@ -30,7 +30,7 @@ Comandos:
 
 ```bash
 git clone <URL_DEL_REPOSITORIO>
-cd SP-DEMO
+cd parcial-T2
 docker compose up -d
 ./mvnw spring-boot:run
 
@@ -95,7 +95,7 @@ http://localhost:8081/swagger-ui/
 Opción 1 (rápida por terminal, dentro del contenedor):
 
 ```bash
-docker exec -it sp-demo-postgres psql -U segundo_parcial -d segundo_parcial
+docker exec -it parcial-t2-postgres psql -U segundo_parcial -d segundo_parcial
 ```
 
 Comandos útiles dentro de `psql`:

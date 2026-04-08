@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16
-    container_name: sp-demo-postgres
+    container_name: parcial-t2-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: segundo_parcial
